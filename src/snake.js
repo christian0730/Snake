@@ -1,3 +1,7 @@
+// This file defines the in-game snake class. It knows how to move in the
+// arrow key directions, and grow itself. A snake is made up of an array of
+// segments.
+
 define(['../lib/impulse'], function(Impulse) {
 
 	// imports
@@ -22,7 +26,8 @@ define(['../lib/impulse'], function(Impulse) {
 	// Snake class
 
 	var Snake = function(x, y, dir) {
-		// generate initial snake segments, starting at (x, y) and working in backwards direction
+		// generate initial snake segments, starting at (x, y) and working in
+		// backwards direction
 		var previous = this._previous(dir);
 		this._segments = [
 			new Segment(x, y),
@@ -46,6 +51,7 @@ define(['../lib/impulse'], function(Impulse) {
 			return this._dir;
 		},
 		set direction(dir) {
+			// only allow arrow key directions, else throw error
 			if (dir === 'left' || dir === 'up' || dir === 'right' || dir === 'down')
 				this._dir = dir;
 			else
@@ -58,6 +64,7 @@ define(['../lib/impulse'], function(Impulse) {
 			return this._segments.length;
 		},
 		get position() {
+			// return the position of the head segment
 			return {
 				x: this._segments[0].x,
 				y: this._segments[0].y
@@ -92,6 +99,7 @@ define(['../lib/impulse'], function(Impulse) {
 			this.onMoved.dispatch(this, dir);
 		},
 		_next: function(dir) {
+			// map arrow key directions to 2D vectors
 			switch (dir) {
 				case 'left': return { x: -1, y: 0 };
 				case 'up': return { x: 0, y: -1 };
@@ -101,6 +109,7 @@ define(['../lib/impulse'], function(Impulse) {
 			} // switch
 		},
 		_previous: function(dir) {
+			// map arrow key directions to 2D vectors, only reversed
 			var next = this._next(dir);
 			next.x = -next.x;
 			next.y = -next.y;

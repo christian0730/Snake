@@ -7,6 +7,7 @@
 		<script type="text/javascript" src="lib/require.min.js" data-main="src/main" charset="utf-8"></script>
 	</head>
 	<body>
+		<!-- GAME MENU - table was the fastest/easiest way to center content -->
 		<table id="ui_menu" class="menu-container">
 			<tr>
 				<td class="bg">
@@ -34,7 +35,11 @@
 				</td>
 			</tr>
 		<table>
+
+		<!-- RENDER TARGET - canvas for the game to use as 2D render target -->
 		<canvas id="layer1" class="layer"></canvas>
+
+		<!-- GAME UI - use HTML to describe game UI, and update it by listening to game event delegates -->
 		<div id="ui_paused" class="ui top lg">PAUSED<div class="xsm">Press space to unpause</div></div>
 		<div id="ui_lost" class="ui top lg hidden">YOU LOSE!<div class="xsm">Click the board to reset</div></div>
 		<div id="ui_score" class="ui bottom sm">Score: <span id="ui_score_value">&mdash;</span></div>

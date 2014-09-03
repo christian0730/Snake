@@ -1,3 +1,6 @@
+// This is an Enum of animation names
+// It maps animation name to animation array position (see models.js)
+
 define(function() {
 	return {
 		normal: 0,

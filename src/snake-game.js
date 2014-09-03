@@ -1,3 +1,7 @@
+// This file contains the SnakeGame definition. It contains all of the game state,
+// either itself or via a Field class instance. This class is the entry point
+// into the snake game simulation.
+
 define(['../lib/underscore', '../lib/impulse', '../lib/keymaster', 'field', 'entities', 'fullscreen'], function(_, Impulse, key, Field, Entities, Fullscreen) {
 	"use strict";
 
@@ -9,7 +13,10 @@ define(['../lib/underscore', '../lib/impulse', '../lib/keymaster', 'field', 'ent
 	var Scene = Impulse.Scene2D.Scene;
 	var Vector = Impulse.Shape2D.Vector;
 
+	// SnakeGame class
+
 	var SnakeGame = function(canvasLayer1) {
+		// cache the render target HTML canvas
 		this._canvasLayer1 = canvasLayer1;
 
 		// init event delegates
@@ -32,9 +39,11 @@ define(['../lib/underscore', '../lib/impulse', '../lib/keymaster', 'field', 'ent
 			return this._isPaused;
 		},
 		set isPaused(isPaused) {
+			// don't allow unpausing if the player lost
 			if (this._isLost && !isPaused)
 				return;
 
+			// change pause state, and dispatch event
 			this._isPaused = isPaused;
 			this.onPaused.dispatch(isPaused);
 		},
@@ -44,16 +53,22 @@ define(['../lib/underscore', '../lib/impulse', '../lib/keymaster', 'field', 'ent
 		set speed(speed) {
 			this._speed = speed;
 
+			// clear any existing simulation update interval
 			if (this._interval !== undefined)
 				clearInterval(this._interval);
 
+			// reset the simulation update interval to refect the new speed
+			// normal update interval is 250ms
 			this._interval = setInterval(_.bind(this.update, this), 250 / speed);
 		},
 
 		// private methods
 
 		_initKeyboard: function() {
+			// init pause and fullscreen keybindings
 			key('space', _.bind(function() { this.isPaused = !this.isPaused; }, this));
+
+			// check fullscreen support exists before binding fullscreen key
 			if (Fullscreen.canFullscreen())
 				key('f', Fullscreen.toggleFullscreen);
 		},
@@ -61,16 +76,15 @@ define(['../lib/underscore', '../lib/impulse', '../lib/keymaster', 'field', 'ent
 		// public methods
 
 		render: function() {
-			//if (this._scene0 !== undefined)
-			//	this._scene0.render();
-
+			// render the current simulation
 			if (this._field !== undefined)
 				this._field.render();
 
+			// request a re-render at the next opportunity
 			requestAnimationFrame(_.bind(this.render, this));
 		},
 		reset: function(w, h, speed) {
-			// defaults
+			// init defaults
 			if (w === undefined)
 				w = 21;
 			if (h === undefined)
@@ -80,6 +94,8 @@ define(['../lib/underscore', '../lib/impulse', '../lib/keymaster', 'field', 'ent
 
 			// pause the game
 			this.isPaused = true;
+
+			// make sure lost flag is unset
 			this._isLost = false;
 
 			// reset speed
@@ -89,11 +105,13 @@ define(['../lib/underscore', '../lib/impulse', '../lib/keymaster', 'field', 'ent
 			this._score = 0;
 			this.onScoreChanged.dispatch(0, localStorage.highScore || 0);
 
-			// init camera (layer 1)
+			// init Impulse camera
 			var cam1 = new Camera(this._canvasLayer1, 0, 0, (w + 0.5) * 120, (h + 0.5) * 120, 60);
 
 			// init game field
 			this._field = new Field(w, h, 120, cam1);
+
+			// hook into grew event so we can handle scoring
 			this._field.onGrew.add(_.bind(function(field) {
 				// update score
 				this._score += 10 * this.speed * this.speed;
@@ -103,6 +121,8 @@ define(['../lib/underscore', '../lib/impulse', '../lib/keymaster', 'field', 'ent
 				// increase simulation speed
 				this.speed *= 1.025;
 			}, this));
+
+			// hook into the lost event so we can stop the simulation
 			this._field.onLost.add(_.bind(function(field) {
 				this.isPaused = true;
 				this._isLost = true;
@@ -110,9 +130,11 @@ define(['../lib/underscore', '../lib/impulse', '../lib/keymaster', 'field', 'ent
 			}, this));
 		},
 		update: function() {
+			// break if simulation is paused
 			if (this.isPaused)
 				return;
 
+			// proceed to next simulation state
 			if (this._field !== undefined)
 				this._field.update();
 		}

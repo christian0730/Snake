@@ -1,3 +1,6 @@
+// This file defines all of the game engine Entity classes. These are used by
+// Impulse to position and draw the graphical representations of in-game objects
+
 define(['../lib/impulse', '../lib/underscore', 'models', 'animation-names'], function(Impulse, _, Models, AnimationNames) {
 	
 	// Imports

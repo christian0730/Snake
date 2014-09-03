@@ -1,3 +1,8 @@
+// This file contains the game field class. It takes dimensions, a tileSize in
+// pixels, and an Impulse camera object. It is responsible for all the game
+// related logic for a specific instance of the game. The camera is responsible
+// for transforming game world 'pixels' into actual screen pixels.
+
 define(['../lib/underscore', '../lib/impulse', '../lib/keymaster', 'snake', 'berry', 'entities'], function(_, Impulse, key, Snake, Berry, Entities) {
 
 	// imports
@@ -65,6 +70,8 @@ define(['../lib/underscore', '../lib/impulse', '../lib/keymaster', 'snake', 'ber
 			var self = this;
 			var snake = this._snake;
 
+			// set next action function based on key pressed
+			// don't allow the snake to double back on itself
 			key('left', function() {
 				if (snake.direction !== 'right')
 					self._nextAction = _.bind(snake.left, snake);
@@ -86,15 +93,22 @@ define(['../lib/underscore', '../lib/impulse', '../lib/keymaster', 'snake', 'ber
 			var head = this._snake.head;
 			var segs = this._snake.segments;
 
+			// Repeatedly 'guess and check' a new berry location. Don't place
+			// the berry within spawnBuffer tiles of the walls or the snake's
+			// head. Try again if the berry overlaps part of the snake.
+			// * This theoretically could go on forever, but works well in practice
 			guess: while (true) {
+				// generate new random location, accounting for spawnBuffer
 				this._berry.x = Math.random() * (this._w - spawnBuffer * 2) + spawnBuffer | 0;
 				this._berry.y = Math.random() * (this._h - spawnBuffer * 2) + spawnBuffer | 0;
 
+				// check for overlap with the snake
 				for (var i = 1; i < segs.length; i++) {
 					if (this._berry.x == segs[i].x && this._berry.y == segs[i].y)
 						continue guess;
 				} // for( i )
 
+				// check for poximity to the snake's head
 				if (Math.abs(this._berry.x - head.x) > spawnBuffer ||
 					Math.abs(this._berry.y - head.y) > spawnBuffer)
 				{
@@ -102,16 +116,22 @@ define(['../lib/underscore', '../lib/impulse', '../lib/keymaster', 'snake', 'ber
 				} // if
 			} // while
 
+			// update the berry's backing visual representation
 			var entPos = this._tileToWoldPosition(this._berry.x, this._berry.y);
 			this._berryEntity.setPosition(entPos.x, entPos.y);
 		},
 		_tileToWoldPosition: function(x, y) {
+			// translate tile coordinates into game world coordinates
+			// x = tileSize*x - tileSize*width/2 + tileSize/2
+			// y = -tileSize*y + tileSize*height/2 - tileSize/2
 			return {
 				x: this._tileSize * (x - this._w/2 + 0.5),
 				y: this._tileSize * (-y + this._h/2 - 0.5)
 			};
 		},
 		_updateSnakeVisuals: function() {
+			// update the snake's backing visual representation
+
 			var segs = this._snake.segments;
 
 			// create new segment entities if needed
@@ -131,14 +151,16 @@ define(['../lib/underscore', '../lib/impulse', '../lib/keymaster', 'snake', 'ber
 		// public methods
 
 		render: function() {
+			// blank the scene with solid white, then re-render
 			this._scene.blank('#fff');
 			this._scene.render();
 		},
 		update: function() {
+			// do the next registered action, if available
 			if (this._nextAction !== undefined)
 				this._nextAction();
 
-			// check intersection with berry
+			// check snake head intersection with berry
 			var sPos = this._snake.position;
 			if (sPos.x == this._berry.x && sPos.y == this._berry.y) {
 				this._snake.grow();
@@ -146,14 +168,14 @@ define(['../lib/underscore', '../lib/impulse', '../lib/keymaster', 'snake', 'ber
 				this.onGrew.dispatch(this);
 			} // if
 
-			// check intersection with walls
+			// check snake head intersection with walls
 			var head = this._snake.head;
 			if (head.x < 0 || head.x >= this._w || head.y < 0 || head.y >= this._h) {
 				this.onLost.dispatch(this);
 				return;
 			} // if
 
-			// check intersection with snake body
+			// check snake head intersection with snake body
 			var segs = this._snake.segments;
 			for (var i = 1; i < segs.length; i++) {
 				if (head.x == segs[i].x && head.y == segs[i].y) {

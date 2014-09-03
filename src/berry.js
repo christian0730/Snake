@@ -1,3 +1,6 @@
+// This file defines the in-game berry class. Currently it contains only
+// (x,y) coordinates, but exists mainly for future extendability
+
 define(function() {
 
 	// Berry class

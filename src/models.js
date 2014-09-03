@@ -1,5 +1,5 @@
-if (typeof define !== 'function')
-	var define = require('amdefine')(module);
+// This file defines all the models used in the game. This includes references to sprite
+// images and animation definitions
 
 define(['../lib/impulse', 'animation-names'], function(Impulse, AnimationNames) {
 	

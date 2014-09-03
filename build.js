@@ -1,3 +1,5 @@
+// this is a requirejs build config file
+
 ({
     baseUrl: "src",
     name: "main",
