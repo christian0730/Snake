@@ -1,7 +1,0 @@
-Friday - Aug 29, 2014
-* aquired 3rd party libraries
-* learned require.js
-* initial art
-* planned project architecture
-* began implementation, ending with drawing static segments to the screen
-- lunch
